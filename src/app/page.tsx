@@ -72,13 +72,13 @@ export default function LoginPage() {
             MK Solutions
           </CardTitle>
           <CardDescription className="text-gray-500 text-[15px]">
-            Insira suas credenciais para gerenciar o cancelamento de notas.
+            Insira as credenciais de acesso do sistema que você deseja realizar ações em massa.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="domain" className="text-[#414040] font-medium">URL do Sistema (Domínio)</Label>
+              <Label htmlFor="domain" className="text-[#414040] font-medium">URL do Sistema que deseja realizar a ação (Domínio)</Label>
               <Input
                 id="domain"
                 name="domain"
