@@ -25,7 +25,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
-import { Play, Square, Pause, LogOut, CheckCircle2, XCircle, AlertTriangle, Clock, Loader2, Info, FileText, FileSpreadsheet, Trash2, BarChart2, ArrowLeft } from "lucide-react";
+import { Play, Square, Pause, LogOut, CheckCircle2, XCircle, AlertTriangle, Clock, Loader2, Info, FileText, FileSpreadsheet, Trash2, BarChart2, ArrowLeft, Copy } from "lucide-react";
 
 type NotaStatus = "pending" | "running" | "success" | "warning" | "error" | "stopped";
 
@@ -223,6 +223,21 @@ export default function MkNfseCancelPage() {
   const handleStart = () => {
     if (tasks.length === 0) return;
     processQueue();
+  };
+
+  const handleCopyIds = (status: NotaStatus) => {
+    const ids = tasks
+      .filter((t) => t.status === status)
+      .map((t) => t.id)
+      .join("\n");
+
+    if (!ids) {
+      toast.error("Nenhum item encontrado com este status.");
+      return;
+    }
+
+    navigator.clipboard.writeText(ids);
+    toast.success(`Códigos (${status}) copiados para a área de transferência!`);
   };
 
   const handleStop = () => {
@@ -537,88 +552,235 @@ export default function MkNfseCancelPage() {
                           </CardContent>
                         </Card>
                         
-                        <Card className="shadow-sm border-gray-200/60 bg-white hover:border-[#15864d]/30 transition-colors">
+                        <Card className="shadow-sm border-gray-200/60 bg-white hover:border-[#15864d]/30 transition-colors relative overflow-hidden group">
                           <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
                             <CardTitle className="text-sm font-medium text-gray-500">Concluídas</CardTitle>
                             <CheckCircle2 className="h-4 w-4 text-[#15864d]" />
                           </CardHeader>
                           <CardContent>
-                            <div className="text-2xl font-bold text-[#15864d]">
-                              {tasks.filter(t => t.status === "success").length}
+                            <div className="flex justify-between items-end">
+                              <div>
+                                <div className="text-2xl font-bold text-[#15864d]">
+                                  {tasks.filter(t => t.status === "success").length}
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  Faltam {tasks.filter(t => t.status === "pending" || t.status === "running").length}
+                                </p>
+                              </div>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-8 w-8 text-gray-400 hover:text-[#15864d] opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={() => handleCopyIds("success")}
+                                title="Copiar IDs de Sucesso"
+                              >
+                                <Copy className="h-4 w-4" />
+                              </Button>
                             </div>
-                            <p className="text-xs text-muted-foreground mt-1">
-                              Faltam {tasks.filter(t => t.status === "pending" || t.status === "running").length}
-                            </p>
                           </CardContent>
                         </Card>
                         
-                        <Card className="shadow-sm border-gray-200/60 bg-white hover:border-yellow-300 transition-colors">
+                        <Card className="shadow-sm border-gray-200/60 bg-white hover:border-yellow-300 transition-colors relative overflow-hidden group">
                           <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
                             <CardTitle className="text-sm font-medium text-gray-500">Avisos Gerados</CardTitle>
                             <AlertTriangle className="h-4 w-4 text-yellow-600" />
                           </CardHeader>
                           <CardContent>
-                            <div className="text-2xl font-bold text-yellow-600">
-                              {tasks.filter(t => t.status === "warning").length}
+                            <div className="flex justify-between items-end">
+                              <div>
+                                <div className="text-2xl font-bold text-yellow-600">
+                                  {tasks.filter(t => t.status === "warning").length}
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-1">Processadas com ressalvas</p>
+                              </div>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-8 w-8 text-gray-400 hover:text-yellow-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={() => handleCopyIds("warning")}
+                                title="Copiar IDs de Aviso"
+                              >
+                                <Copy className="h-4 w-4" />
+                              </Button>
                             </div>
-                            <p className="text-xs text-muted-foreground mt-1">Processadas com ressalvas</p>
                           </CardContent>
                         </Card>
                         
-                        <Card className="shadow-sm border-red-200 bg-red-50/50 hover:bg-red-50 transition-colors">
+                        <Card className="shadow-sm border-red-200 bg-red-50/50 hover:bg-red-50 transition-colors relative overflow-hidden group">
                           <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
                             <CardTitle className="text-sm font-medium text-red-600">Falhas Totais</CardTitle>
                             <XCircle className="h-4 w-4 text-red-600" />
                           </CardHeader>
                           <CardContent>
-                            <div className="text-2xl font-bold text-red-600">
-                              {tasks.filter(t => t.status === "error").length}
+                            <div className="flex justify-between items-end">
+                              <div>
+                                <div className="text-2xl font-bold text-red-600">
+                                  {tasks.filter(t => t.status === "error").length}
+                                </div>
+                                <p className="text-xs text-red-500/80 mt-1">Requerem atenção manual</p>
+                              </div>
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                className="h-8 w-8 text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                                onClick={() => handleCopyIds("error")}
+                                title="Copiar IDs de Erro"
+                              >
+                                <Copy className="h-4 w-4" />
+                              </Button>
                             </div>
-                            <p className="text-xs text-red-500/80 mt-1">Requerem atenção manual</p>
                           </CardContent>
                         </Card>
                       </div>
 
-                      {/* Lista Focal de Erros */}
-                      <Card className="shadow-sm border-gray-200/60 bg-white mt-6">
-                        <CardHeader className="bg-gray-50/50 border-b border-gray-100 py-4">
-                          <CardTitle className="text-base text-[#414040] flex items-center">
-                            <XCircle className="h-4 w-4 text-red-600 mr-2" />
-                            Relatório Detalhado de Falhas
-                          </CardTitle>
-                          <CardDescription>
-                            Abaixo estão as notas que retornaram erro e não puderam ser processadas pela API do MK.
-                          </CardDescription>
-                        </CardHeader>
-                        <CardContent className="p-0">
-                          <Table className="w-full">
-                            <TableHeader className="bg-[#fafafa]">
-                              <TableRow className="hover:bg-transparent">
-                                <TableHead className="w-[120px] font-medium text-[#414040] px-6">Nota com Falha</TableHead>
-                                <TableHead className="font-medium text-[#414040]">Motivo Registrado</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {tasks.filter(t => t.status === "error").length === 0 ? (
-                                <TableRow className="hover:bg-transparent border-0">
-                                  <TableCell colSpan={2} className="h-32 text-center text-gray-400 font-medium">
-                                    Nenhum erro registrado até o momento. Excelente!
-                                  </TableCell>
-                                </TableRow>
-                              ) : (
-                                tasks.filter(t => t.status === "error").map((task, index) => (
-                                  <TableRow key={`err-${task.id}-${index}`} className="hover:bg-red-50/50 transition-colors">
-                                    <TableCell className="font-bold text-red-700 py-4 px-6">{task.id}</TableCell>
-                                    <TableCell className="text-sm text-[#414040] py-4 break-words max-w-[600px]">
-                                      {task.message}
-                                    </TableCell>
-                                  </TableRow>
-                                ))
-                              )}
-                            </TableBody>
-                          </Table>
-                        </CardContent>
-                      </Card>
+                      {/* Relatórios Detalhados com Tabs Internas */}
+                      <div className="mt-8">
+                        <Tabs defaultValue="erros" className="w-full">
+                          <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-semibold text-[#414040] flex items-center">
+                              <BarChart2 className="h-5 w-5 mr-2 text-[#205266]" />
+                              Relatórios Detalhados
+                            </h3>
+                            <TabsList className="bg-[#f0f0f0] border-none ml-auto">
+                              <TabsTrigger value="sucessos" className="data-[state=active]:bg-white data-[state=active]:text-[#15864d]">Sucessos</TabsTrigger>
+                              <TabsTrigger value="avisos" className="data-[state=active]:bg-white data-[state=active]:text-yellow-700">Avisos</TabsTrigger>
+                              <TabsTrigger value="erros" className="data-[state=active]:bg-white data-[state=active]:text-red-700">Erros</TabsTrigger>
+                            </TabsList>
+                          </div>
+
+                          <TabsContent value="sucessos">
+                            <Card className="shadow-sm border-gray-200/60 bg-white">
+                              <CardHeader className="bg-gray-50/30 border-b border-gray-100 py-3">
+                                <CardTitle className="text-sm font-semibold flex items-center justify-between">
+                                  <div className="flex items-center">
+                                    <CheckCircle2 className="h-4 w-4 text-[#15864d] mr-2" />
+                                    Notas Processadas com Sucesso
+                                  </div>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="h-7 text-xs border-[#15864d]/30 text-[#15864d] hover:bg-[#15864d]/10"
+                                    onClick={() => handleCopyIds("success")}
+                                  >
+                                    <Copy className="h-3 w-3 mr-1" />
+                                    Copiar Todos
+                                  </Button>
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent className="p-0">
+                                <Table>
+                                  <TableHeader className="bg-[#fafafa]">
+                                    <TableRow className="hover:bg-transparent">
+                                      <TableHead className="w-[120px] font-medium text-[#414040] px-6">Nota</TableHead>
+                                      <TableHead className="font-medium text-[#414040]">Mensagem de Retorno</TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {tasks.filter(t => t.status === "success").length === 0 ? (
+                                      <TableRow><TableCell colSpan={2} className="h-24 text-center text-gray-400">Nenhum sucesso registrado.</TableCell></TableRow>
+                                    ) : (
+                                      tasks.filter(t => t.status === "success").map((task) => (
+                                        <TableRow key={task.id} className="hover:bg-green-50/30">
+                                          <TableCell className="font-semibold text-[#15864d] px-6">{task.id}</TableCell>
+                                          <TableCell className="text-sm text-gray-600">{task.message}</TableCell>
+                                        </TableRow>
+                                      ))
+                                    )}
+                                  </TableBody>
+                                </Table>
+                              </CardContent>
+                            </Card>
+                          </TabsContent>
+
+                          <TabsContent value="avisos">
+                            <Card className="shadow-sm border-gray-200/60 bg-white">
+                              <CardHeader className="bg-gray-50/30 border-b border-gray-100 py-3">
+                                <CardTitle className="text-sm font-semibold flex items-center justify-between">
+                                  <div className="flex items-center">
+                                    <AlertTriangle className="h-4 w-4 text-yellow-600 mr-2" />
+                                    Notas com Avisos/Ressalvas
+                                  </div>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="h-7 text-xs border-yellow-400/30 text-yellow-700 hover:bg-yellow-50"
+                                    onClick={() => handleCopyIds("warning")}
+                                  >
+                                    <Copy className="h-3 w-3 mr-1" />
+                                    Copiar Todos
+                                  </Button>
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent className="p-0">
+                                <Table>
+                                  <TableHeader className="bg-[#fafafa]">
+                                    <TableRow className="hover:bg-transparent">
+                                      <TableHead className="w-[120px] font-medium text-[#414040] px-6">Nota</TableHead>
+                                      <TableHead className="font-medium text-[#414040]">Motivo do Aviso</TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {tasks.filter(t => t.status === "warning").length === 0 ? (
+                                      <TableRow><TableCell colSpan={2} className="h-24 text-center text-gray-400">Nenhum aviso registrado.</TableCell></TableRow>
+                                    ) : (
+                                      tasks.filter(t => t.status === "warning").map((task) => (
+                                        <TableRow key={task.id} className="hover:bg-yellow-50/50">
+                                          <TableCell className="font-semibold text-yellow-700 px-6">{task.id}</TableCell>
+                                          <TableCell className="text-sm text-gray-600">{task.message}</TableCell>
+                                        </TableRow>
+                                      ))
+                                    )}
+                                  </TableBody>
+                                </Table>
+                              </CardContent>
+                            </Card>
+                          </TabsContent>
+
+                          <TabsContent value="erros">
+                            <Card className="shadow-sm border-red-200 bg-white overflow-hidden">
+                              <CardHeader className="bg-red-50/50 border-b border-red-100 py-3">
+                                <CardTitle className="text-sm font-semibold flex items-center justify-between">
+                                  <div className="flex items-center text-red-700">
+                                    <XCircle className="h-4 w-4 mr-2" />
+                                    Notas com Erro Reais
+                                  </div>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="h-7 text-xs border-red-300 text-red-700 hover:bg-red-100"
+                                    onClick={() => handleCopyIds("error")}
+                                  >
+                                    <Copy className="h-3 w-3 mr-1" />
+                                    Copiar Todos
+                                  </Button>
+                                </CardTitle>
+                              </CardHeader>
+                              <CardContent className="p-0">
+                                <Table>
+                                  <TableHeader className="bg-[#fafafa]">
+                                    <TableRow className="hover:bg-transparent">
+                                      <TableHead className="w-[120px] font-medium text-[#414040] px-6">Nota Falha</TableHead>
+                                      <TableHead className="font-medium text-[#414040]">Motivo Registrado</TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {tasks.filter(t => t.status === "error").length === 0 ? (
+                                      <TableRow><TableCell colSpan={2} className="h-24 text-center text-gray-400">Nenhuma falha registrada.</TableCell></TableRow>
+                                    ) : (
+                                      tasks.filter(t => t.status === "error").map((task) => (
+                                        <TableRow key={task.id} className="hover:bg-red-50/30 transition-colors">
+                                          <TableCell className="font-bold text-red-700 px-6">{task.id}</TableCell>
+                                          <TableCell className="text-sm text-gray-600 py-4 break-words max-w-[600px]">{task.message}</TableCell>
+                                        </TableRow>
+                                      ))
+                                    )}
+                                  </TableBody>
+                                </Table>
+                              </CardContent>
+                            </Card>
+                          </TabsContent>
+                        </Tabs>
+                      </div>
 
                     </div>
                   </div>

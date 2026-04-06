@@ -12,7 +12,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!domain.startsWith("https://") || !domain.endsWith("/mk")) {
+    if (!domain.startsWith("http") || !domain.endsWith("/mk")) {
       return NextResponse.json(
         {
           error:
